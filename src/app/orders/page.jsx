@@ -2,31 +2,47 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getOrders } from "../../lib/api";
+import { getMyOrders } from "../../lib/api";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../../context/AuthContext";
 
 export default function OrdersPage() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    const fetchOrders = async () => {
-        try {
-            setLoading(true);
-            setError("");
-
-            const result = await getOrders();
-
-            setOrders(result);
-        } catch (error) {
-            setError(error.message);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const { token } = useAuth();
+    const router = useRouter();
 
     useEffect(() => {
+        if (!token) {
+            router.push("/login");
+        }
+    }, [token, router]);
+
+    useEffect(() => {
+        if (!token) return;
+
+        const fetchOrders = async () => {
+            try {
+                setLoading(true);
+                setError("");
+
+                const result = await getMyOrders();
+
+                setOrders(result);
+            } catch (error) {
+                setError(error.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchOrders();
-    }, []);
+    }, [token]);
+
+    // This comes AFTER all hooks
+    if (!token) return null;
 
     if (loading) {
         return (
@@ -103,13 +119,12 @@ export default function OrdersPage() {
                                 <div className="sm:text-right">
 
                                     <span
-                                        className={`inline-block rounded-full px-3 py-1 text-xs font-medium ${
-                                            order.status === "pending"
-                                                ? "bg-yellow-400/10 text-yellow-400"
-                                                : order.status === "paid"
+                                        className={`inline-block rounded-full px-3 py-1 text-xs font-medium ${order.status === "pending"
+                                            ? "bg-yellow-400/10 text-yellow-400"
+                                            : order.status === "paid"
                                                 ? "bg-blue-400/10 text-blue-400"
                                                 : "bg-green-400/10 text-green-400"
-                                        }`}
+                                            }`}
                                     >
                                         {order.status}
                                     </span>

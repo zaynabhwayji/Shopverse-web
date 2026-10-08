@@ -9,6 +9,8 @@ import {
     getCategoryProducts,
 } from "../../../lib/api";
 
+import { useRouter } from "next/navigation";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function AdminCategoriesPage() {
     const [categories, setCategories] = useState([]);
@@ -23,6 +25,26 @@ export default function AdminCategoriesPage() {
 
     const [error, setError] = useState("");
     const [message, setMessage] = useState("");
+
+    const { user } = useAuth();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!user) {
+            router.push("/login");
+            return;
+        }
+
+        if (user.role !== "admin") {
+            router.push("/products");
+        }
+    }, [user, router]);
+
+    if (!user || user.role !== "admin") {
+        return null;
+    }
+
+
 
     // Fetch all categories
     const fetchCategories = async () => {

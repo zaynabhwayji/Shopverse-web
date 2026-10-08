@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useContext } from "react";
 import { CartContext } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function NavBar() {
     const { totalItems } = useContext(CartContext);
+    const { user, logout } = useAuth();
 
     return (
 
@@ -50,6 +52,31 @@ export default function NavBar() {
                     >
                         Cart ({totalItems})
                     </Link>
+
+                    {user?.role === "admin" && (
+                        <Link
+                            href="/dashboard"
+                            className="whitespace-nowrap text-gray-300 hover:text-white"
+                        >
+                            Dashboard
+                        </Link>
+                    )}
+
+                    {user ? (
+                        <button
+                            onClick={logout}
+                            className="whitespace-nowrap text-gray-300 hover:text-white"
+                        >
+                            Logout ({user.name})
+                        </button>
+                    ) : (
+                        <Link
+                            href="/login"
+                            className="whitespace-nowrap text-gray-300 hover:text-white"
+                        >
+                            Login
+                        </Link>
+                    )}
 
                 </div>
             </nav>

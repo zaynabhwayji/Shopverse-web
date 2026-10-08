@@ -1,8 +1,29 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function AdminDashboard() {
+    const { user } = useAuth();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!user) {
+            router.push("/login");
+            return;
+        }
+
+        if (user.role !== "admin") {
+            router.push("/products");
+        }
+    }, [user, router]);
+
+    if (!user || user.role !== "admin") {
+        return null;
+    }
+
     return (
         <main className="min-h-screen bg-[#0F172A] p-6 text-white">
             <div className="mx-auto max-w-7xl">

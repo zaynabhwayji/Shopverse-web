@@ -4,16 +4,24 @@ import { useContext, useState } from "react";
 import { CartContext } from "../../context/CartContext";
 import { createOrder } from "../../lib/api";
 
+import { useAuth } from "../../context/AuthContext";
+import { useRouter } from "next/navigation";
+
 export default function CartPage() {
+    const { token } = useAuth();
+    const router = useRouter();
     const { cart, totalPrice, clearCart, increaseQty, decreaseQty, removeFromCart } = useContext(CartContext);
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [order, setOrder] = useState(null);
 
-   const userId = process.env.NEXT_PUBLIC_USER_ID;
-
     const handlePlaceOrder = async () => {
+        if (!token) {
+            router.push("/login");
+            return;
+        }
+
         try {
             setLoading(true);
             setError("");
@@ -25,10 +33,7 @@ export default function CartPage() {
             }));
 
             // Do NOT send total
-            const result = await createOrder({
-                user: userId,
-                items,
-            });
+            const result = await createOrder({items});
 
             // Server calculates the real total
             setOrder(result);
