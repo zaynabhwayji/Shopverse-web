@@ -361,7 +361,7 @@ export async function getMe() {
     const token = localStorage.getItem("token");
 
     const res = await fetch(`${API}/auth/me`, {
-        ...authHeaders()
+        headers: authHeaders()
     }
     );
 
